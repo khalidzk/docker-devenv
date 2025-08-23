@@ -1,0 +1,109 @@
+services:
+  # redis-master
+  redis-master:
+    image: redis:7.4.5
+    container_name: redis-master
+    restart: always
+    ports:
+      - 6379:6379
+    environment:
+      TZ: "Asia/Shanghai"
+    volumes:
+      - ./redis/conf/redis-master.conf:/usr/local/etc/redis/redis.conf
+      - ./redis/.data/redis-master/:/data:Z
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    networks:
+      redis-network:
+        ipv4_address: 172.200.0.2
+
+  # redis slave 1
+  redis-slave1:
+    image: redis:7.4.5
+    container_name: redis-slave1
+    restart: always
+    ports:
+      - 6380:6379
+    environment:
+      TZ: "Asia/Shanghai"
+    volumes:
+      - ./redis/conf/redis-slave1.conf:/usr/local/etc/redis/redis.conf
+      - ./redis/.data/redis-slave1/:/data:Z
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    networks:
+      redis-network:
+        ipv4_address: 172.200.0.3
+
+  # redis slave 2
+  redis-slave2:
+    image: redis:7.4.5
+    container_name: redis-slave2
+    restart: always
+    ports:
+      - 6381:6379
+    environment:
+      TZ: "Asia/Shanghai"
+    volumes:
+      - ./redis/conf/redis-slave2.conf:/usr/local/etc/redis/redis.conf
+      - ./redis/.data/redis-slave2/:/data:Z
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    networks:
+      redis-network:
+        ipv4_address: 172.200.0.4
+
+  # sentinel 1
+  redis-sentinel1:
+    image: redis:7.4.5
+    container_name: redis-sentinel1
+    restart: always
+    environment:
+      TZ: "Asia/Shanghai"
+    ports:
+      - 26379:26379
+    volumes:
+      - ./sentinel/conf/redis-sentinel1:/usr/local/etc/redis/conf
+      - ./sentinel/.data:/data:Z
+    command: redis-sentinel /usr/local/etc/redis/conf/sentinel.conf
+    networks:
+      redis-network:
+        ipv4_address: 172.200.0.5
+
+  # sentinel 2
+  redis-sentinel2:
+    image: redis:7.4.5
+    container_name: redis-sentinel2
+    restart: always
+    environment:
+      TZ: "Asia/Shanghai"
+    ports:
+      - 26380:26379
+    volumes:
+      - ./sentinel/conf/redis-sentinel2:/usr/local/etc/redis/conf
+      - ./sentinel/.data:/data:Z
+    command: redis-sentinel /usr/local/etc/redis/conf/sentinel.conf
+    networks:
+      redis-network:
+        ipv4_address: 172.200.0.6
+
+  # sentinel 3
+  redis-sentinel3:
+    image: redis:7.4.5
+    container_name: redis-sentinel3
+    restart: always
+    environment:
+      TZ: "Asia/Shanghai"
+    ports:
+      - 26381:26379
+    volumes:
+      - ./sentinel/conf/redis-sentinel3:/usr/local/etc/redis/conf
+      - ./sentinel/.data:/data:Z
+    command: redis-sentinel /usr/local/etc/redis/conf/sentinel.conf
+    networks:
+      redis-network:
+        ipv4_address: 172.200.0.7
+
+networks:
+  redis-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.200.0.0/24
