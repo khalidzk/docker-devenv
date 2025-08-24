@@ -47,3 +47,6 @@ target
 
 # 确保 .data 目录本身不被忽略
 !**/.data/
+
+#redis哨兵集群模式conf目录忽略
+**/redis-sentinel-replication/*/conf
