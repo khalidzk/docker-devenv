@@ -1,0 +1,123 @@
+services:
+  redis-cluster-node1:
+    image: redis:7.4.5
+    container_name: redis-cluster-node1
+    restart: always
+    ports:
+      - 6379:6379
+    environment:
+      TZ: "Asia/Shanghai"
+    volumes:
+      - ./conf/redis-cluster-node1:/usr/local/etc/redis
+      - ./.data/redis-cluster-node1/:/data:Z
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    networks:
+      redis-cluster-network:
+        ipv4_address: 172.202.0.2
+
+  redis-cluster-node2:
+    image: redis:7.4.5
+    container_name: redis-cluster-node2
+    restart: always
+    ports:
+      - 6380:6380
+    environment:
+      TZ: "Asia/Shanghai"
+    volumes:
+      - ./conf/redis-cluster-node2:/usr/local/etc/redis
+      - ./.data/redis-cluster-node2/:/data:Z
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    networks:
+      redis-cluster-network:
+        ipv4_address: 172.202.0.3
+  
+  redis-cluster-node3:
+    image: redis:7.4.5
+    container_name: redis-cluster-node3
+    restart: always
+    ports:
+      - 6381:6381
+    environment:
+      TZ: "Asia/Shanghai"
+    volumes:
+      - ./conf/redis-cluster-node3:/usr/local/etc/redis
+      - ./.data/redis-cluster-node3/:/data:Z
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    networks:
+      redis-cluster-network:
+        ipv4_address: 172.202.0.4
+  
+  redis-cluster-node4:
+    image: redis:7.4.5
+    container_name: redis-cluster-node4
+    restart: always
+    ports:
+      - 6382:6382
+    environment:
+      TZ: "Asia/Shanghai"
+    volumes:
+      - ./conf/redis-cluster-node4:/usr/local/etc/redis
+      - ./.data/redis-cluster-node4/:/data:Z
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    networks:
+      redis-cluster-network:
+        ipv4_address: 172.202.0.5
+
+  redis-cluster-node5:
+    image: redis:7.4.5
+    container_name: redis-cluster-node5
+    restart: always
+    ports:
+      - 6383:6383
+    environment:
+      TZ: "Asia/Shanghai"
+    volumes:
+      - ./conf/redis-cluster-node5:/usr/local/etc/redis
+      - ./.data/redis-cluster-node5/:/data:Z
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    networks:
+      redis-cluster-network:
+        ipv4_address: 172.202.0.6
+
+  redis-cluster-node6:
+    image: redis:7.4.5
+    container_name: redis-cluster-node6
+    restart: always
+    ports:
+      - 6384:6384
+    environment:
+      TZ: "Asia/Shanghai"
+    volumes:
+      - ./conf/redis-cluster-node6:/usr/local/etc/redis
+      - ./.data/redis-cluster-node6/:/data:Z
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    networks:
+      redis-cluster-network:
+        ipv4_address: 172.202.0.7
+
+  redis-cluster-init:  # redis-cli服务，作用是在上面六个redis节点启动成功之后，执行集群创建的命令
+    image: redis:7.4.5
+    container_name: redis-cluster-init
+    depends_on:  # 设置依赖顺序，在上面六个节点启动成功之后启动
+      - redis-cluster-node1
+      - redis-cluster-node2
+      - redis-cluster-node3
+      - redis-cluster-node4
+      - redis-cluster-node5
+      - redis-cluster-node6
+    volumes:
+    - ./scripts/init-redis-cluster.sh:/init-redis-cluster.sh
+    command: >
+      bash -c "
+      chmod +x /init-redis-cluster.sh && /init-redis-cluster.sh
+      "
+    networks:
+      - redis-cluster-network
+    restart: "no" # 因为该服务只是用来执行Redis集群初始化的命令，所以服务关闭之后不需要重启
+
+networks:
+  redis-cluster-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.202.0.0/24
