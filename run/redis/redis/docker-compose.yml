@@ -1,5 +1,4 @@
 services:
-  # redis-masater
   redis:
     image: redis:7.4.5
     container_name: redis
